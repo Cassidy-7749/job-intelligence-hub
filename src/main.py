@@ -33,7 +33,11 @@ async def run():
     vault_path = os.getenv("OBSIDIAN_VAULT_PATH", "./obsidian_output")
     resume_path = os.getenv("RESUME_PATH", "resume.txt")
     
+    locations_env = os.getenv("LOCATIONS", "")
+    locations = [l.strip() for l in locations_env.split(",")] if locations_env else []
+    
     logger.info(f"Keywords: {keywords}")
+    logger.info(f"Locations: {locations}")
     logger.info(f"Vault: {vault_path}")
     
     # Initialize Folder
@@ -55,7 +59,7 @@ async def run():
     
     # 1. Scrape
     logger.info(">>> Step 1: Scraping Jobs...")
-    jobs = await scraper.scrape(keywords=keywords, max_jobs=5)
+    jobs = await scraper.scrape(keywords=keywords, locations=locations, max_jobs=5)
     logger.info(f"Scraped {len(jobs)} jobs.")
     
     if not jobs:

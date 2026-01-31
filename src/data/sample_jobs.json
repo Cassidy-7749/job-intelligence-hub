@@ -22,5 +22,17 @@
         },
         "description": "協助開發後端系統，維護資料庫。需要熟悉 Java, SQL。提供完整的教育訓練。",
         "appearDate": "2026/01/31"
+    },
+    {
+        "jobName": "Java 後端開發工程師",
+        "custName": "Taichung Tech",
+        "salaryLow": "60000",
+        "salaryHigh": "80000",
+        "jobAddrNoDesc": "台中市西屯區",
+        "link": {
+            "jobUrl": "//www.104.com.tw/job/abcde"
+        },
+        "description": "台中在地知名企業招募後端，環境優，福利佳。",
+        "appearDate": "2026/01/31"
     }
 ]

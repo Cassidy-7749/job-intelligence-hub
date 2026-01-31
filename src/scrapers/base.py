@@ -4,7 +4,7 @@ from src.models import JobData
 
 class BaseScraper(ABC):
     @abstractmethod
-    async def scrape(self, keywords: List[str], max_jobs: int = 10) -> List[JobData]:
+    async def scrape(self, keywords: List[str], locations: List[str] = None, max_jobs: int = 10) -> List[JobData]:
         """
         Scrape jobs from the source.
         

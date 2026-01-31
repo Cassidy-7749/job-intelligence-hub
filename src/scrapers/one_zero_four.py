@@ -9,7 +9,7 @@ from src.models import JobData
 logger = logging.getLogger(__name__)
 
 class OneZeroFourScraper(BaseScraper):
-    async def scrape(self, keywords: List[str], max_jobs: int = 10) -> List[JobData]:
+    async def scrape(self, keywords: List[str], locations: List[str] = None, max_jobs: int = 10) -> List[JobData]:
         all_jobs = []
         async with async_playwright() as p:
             browser = await p.chromium.launch(
@@ -48,15 +48,23 @@ class OneZeroFourScraper(BaseScraper):
                         data = await response.json()
                         if "data" in data and "list" in data["data"]:
                             items = data["data"]["list"]
-                            api_jobs_data.extend(items)
-                            print(f"Extracted {len(items)} items from API")
+                            # Pre-filter by location if provided
+                            if locations:
+                                filtered_items = []
+                                for item in items:
+                                    addr = item.get('jobAddrNoDesc', '')
+                                    if any(loc in addr for loc in locations):
+                                        filtered_items.append(item)
+                                api_jobs_data.extend(filtered_items)
+                                print(f"Extracted {len(filtered_items)} items from API (Filtered by Location)")
+                            else:
+                                api_jobs_data.extend(items)
+                                print(f"Extracted {len(items)} items from API")
                     except Exception as e:
                         print(f"Failed to parse JSON: {e}")
                         
                 except Exception as e:
                     logger.error(f"Error scraping {keyword}: {e}")
-                    # Continue to next keyword or try to list items from DOM
-                    # DOM Fallback?
                 
                 # Process Data
                 for j in api_jobs_data:
@@ -69,6 +77,11 @@ class OneZeroFourScraper(BaseScraper):
                     if link and link.startswith("//"): link = "https:" + link
                     
                     if not link or any(job.link == link for job in all_jobs): continue
+
+                    # Double check location filter
+                    addr = j.get('jobAddrNoDesc', 'Unknown')
+                    if locations and not any(loc in addr for loc in locations):
+                        continue
 
                     print(f"Fetching details: {title}")
                     raw_content = j.get('description', '') 
@@ -93,7 +106,7 @@ class OneZeroFourScraper(BaseScraper):
                         title=title,
                         company=company,
                         salary=f"{j.get('salaryLow',0)} - {j.get('salaryHigh',0)}",
-                        location=j.get('jobAddrNoDesc', 'Unknown'),
+                        location=addr,
                         link=link,
                         source="104",
                         raw_content=raw_content.strip(),
@@ -114,6 +127,11 @@ class OneZeroFourScraper(BaseScraper):
                     with open(mock_path, 'r', encoding='utf-8') as f:
                         mock_data = json.load(f)
                     for j in mock_data:
+                        # Check location filter for mock data
+                        addr = j.get('jobAddrNoDesc', 'Unknown')
+                        if locations and not any(loc in addr for loc in locations):
+                            continue
+                            
                         link_info = j.get('link', {})
                         link = link_info.get('jobUrl')
                         if link and link.startswith('//'): link = 'https:' + link
@@ -122,7 +140,7 @@ class OneZeroFourScraper(BaseScraper):
                             title=j.get('jobName'),
                             company=j.get('custName'),
                             salary=f"{j.get('salaryLow')} - {j.get('salaryHigh')}",
-                            location=j.get('jobAddrNoDesc'),
+                            location=addr,
                             link=link or "https://www.104.com.tw",
                             source="104",
                             raw_content=j.get('description', ''),
