@@ -26,7 +26,7 @@ class JobProcessor:
 
         if genai and gemini_key:
             genai.configure(api_key=gemini_key)
-            self.client = genai.GenerativeModel('gemini-1.5-flash')
+            self.client = genai.GenerativeModel('gemini-pro-latest')
             self.model_type = 'gemini'
             logger.info("Using Gemini AI for processing.")
         elif OpenAI and openai_key:
