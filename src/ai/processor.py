@@ -8,18 +8,33 @@ try:
 except ImportError:
     OpenAI = None
 
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+
 logger = logging.getLogger(__name__)
 
 class JobProcessor:
     def __init__(self, resume_text: str):
         self.resume = resume_text
         self.client = None
+        self.model_type = None # 'openai' or 'gemini'
         
-        api_key = os.getenv("OPENAI_API_KEY")
-        if OpenAI and api_key:
-            self.client = OpenAI(api_key=api_key)
+        gemini_key = os.getenv("GEMINI_API_KEY")
+        openai_key = os.getenv("OPENAI_API_KEY")
+
+        if genai and gemini_key:
+            genai.configure(api_key=gemini_key)
+            self.client = genai.GenerativeModel('gemini-1.5-flash')
+            self.model_type = 'gemini'
+            logger.info("Using Gemini AI for processing.")
+        elif OpenAI and openai_key:
+            self.client = OpenAI(api_key=openai_key)
+            self.model_type = 'openai'
+            logger.info("Using OpenAI for processing.")
         else:
-            logger.warning("OPENAI_API_KEY not found or openai module missing. AI features disabled.")
+            logger.warning("No AI API keys found or modules missing. AI features disabled.")
 
     def process(self, job: JobData) -> JobData:
         if not self.client:
@@ -50,16 +65,24 @@ class JobProcessor:
             }}
             """
             
-            response = self.client.chat.completions.create(
-                model="gpt-4o", # Or gpt-4-turbo
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant that outputs JSON."},
-                    {"role": "user", "content": prompt}
-                ],
-                response_format={ "type": "json_object" }
-            )
-            
-            content = response.choices[0].message.content
+            if self.model_type == 'openai':
+                response = self.client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant that outputs JSON."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    response_format={ "type": "json_object" }
+                )
+                content = response.choices[0].message.content
+            else: # gemini
+                response = self.client.generate_content(
+                    prompt,
+                    generation_config=genai.types.GenerationConfig(
+                        response_mime_type="application/json"
+                    )
+                )
+                content = response.text
             data = json.loads(content)
             
             job.tech_stack = data.get("tech_stack", [])

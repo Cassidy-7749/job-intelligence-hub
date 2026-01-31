@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 import sys
 
 # Ensure src is in path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Ensure project root is in path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.scrapers.one_zero_four import OneZeroFourScraper
 from src.ai.processor import JobProcessor
