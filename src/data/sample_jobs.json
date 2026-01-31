@@ -1,0 +1,26 @@
+[
+    {
+        "jobName": "Java 後端工程師",
+        "custName": "TechCorp Inc.",
+        "salaryLow": "70000",
+        "salaryHigh": "90000",
+        "jobAddrNoDesc": "台北市信義區",
+        "link": {
+            "jobUrl": "//www.104.com.tw/job/12345"
+        },
+        "description": "我們正在尋找資深的 Java 工程師，熟悉 Spring Boot, Microservices, Kubernetes。工作內容包含 API 開發、系統架構設計。加分條件：AWS 經驗。",
+        "appearDate": "2026/01/30"
+    },
+    {
+        "jobName": "Junior Backend Developer (Java)",
+        "custName": "StartUp Co.",
+        "salaryLow": "50000",
+        "salaryHigh": "70000",
+        "jobAddrNoDesc": "新竹市",
+        "link": {
+            "jobUrl": "//www.104.com.tw/job/67890"
+        },
+        "description": "協助開發後端系統，維護資料庫。需要熟悉 Java, SQL。提供完整的教育訓練。",
+        "appearDate": "2026/01/31"
+    }
+]
